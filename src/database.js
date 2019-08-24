@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// MongoDB connection
 async function connect() {
   try {
     await mongoose.connect('mongodb://localhost/sessionTest', {
@@ -13,4 +14,10 @@ async function connect() {
   }
 }
 
-connect();
+// Exports:
+// connect for instantiate the db in app.js
+// mongoose for MongoStore connection
+module.exports = {
+  connect,
+  mongoose
+};
