@@ -1,7 +1,16 @@
 const express = require('express');
+const session = require('express-session');
 require('./database');
 
 const app = express();
+
+app.use(
+  session({
+    secret: 'SECRET',
+    resave: true,
+    saveUninitialized: true
+  })
+);
 
 app.get('/', (req, res) => {
   res.send('Server Ready');
