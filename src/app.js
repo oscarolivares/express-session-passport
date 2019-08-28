@@ -2,11 +2,14 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const db = require('./database');
-const User = require('./models/User');
+const passport = require('passport');
+const passportConfig = require('./passport');
+const sessionController = require('./controllers/session.controller');
 
 const app = express();
 db.connect();
 
+// Express-session middleware
 app.use(
   session({
     secret: 'SECRET',
@@ -18,30 +21,23 @@ app.use(
   })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.get('/', (req, res) => {
-  req.session.counter = req.session.counter ? req.session.counter + 1 : 1;
-  res.send(`You have requested this page <${req.session.counter}> times`);
+  res.send('Ready');
 });
 
-// Router for test user creation operations
-/* app.get('/create-user', async (req, res) => {
-  const UserTest = new User({
-    email: 'user@test.com',
-    password: '123',
-    fristname: 'John',
-    lastname: 'Doe'
-  });
+app.post('/signup', sessionController.signup);
+app.post('/login', sessionController.login);
+app.get('/logout', passportConfig.isAutheticated, sessionController.logout);
 
-  UserTest.save()
-    .then(() => {
-      console.log(UserTest);
-      res.send('Seccess');
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).send('Fail');
-    });
-}); */
+app.get('/user-info', passportConfig.isAutheticated, (req, res) => {
+  res.json(req.user);
+});
 
 // Status 404 handler
 app.use((req, res, next) => {
